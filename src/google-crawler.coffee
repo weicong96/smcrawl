@@ -1,10 +1,13 @@
 Q = require("q")
 class Google
     constructor : (@App)->
+        console.log "google"
         @coordinates = @App.coordinates
+        @App.router.get "/api", (req, res)=>
+            return @App.sendContent req, res, "hello"
         @App.router.get "/api/coordinates", (req, res)=>
             return @App.sendContent req ,res, @App.coordinates
-        #@App.router.get "/api/places",@getPlace
+        @App.router.get "/api/places",@getPlace
     getPlace : (req, res)=>
         return @getPlaces([1.3286630568239044,103.90028772480807])
         

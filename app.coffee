@@ -10,12 +10,18 @@ request = require("request")
 express = require("express")
 mongodb = require("mongodb")
 Google = require("./src/google-crawler")
+geolib = require("geolib")
+
+fs = require("fs")
+q = require("q")
 class App
     constructor : ()->
         @config = config
         @request = request
-        @coordinates = @generateCoordinates(config['google']['distance'])
-        
+        #@coordinates = @generateCoordinates(config['google']['distance'])
+        @coordinatesFromKml().then (result)=>
+            @coordinates = result
+            console.log result
         @router = new express()
         @router.use express.json()
         @router.use express.urlencoded()
@@ -24,11 +30,13 @@ class App
         @router.use "/css", express.static "#{__dirname}/www/css"
         @router.use "/templates", express.static "#{__dirname}/www/templates"
         @router.use "/bower_components" , express.static "#{__dirname}/www/bower_components"
+
         @router.all "/*", (req, res, next)=>
             regex = new RegExp('^/api')
             if regex.test req['originalUrl']
-                next()
+                return next()
             else    
+                console.log "index"
                 res.sendfile "index.html" , {root : __dirname+"/www"}
         #Cross origin fix
         @router.use (req, res, next)=>
@@ -42,7 +50,24 @@ class App
         mongodb.connect config.mongodb , (err,db)=>
             if !err
                 google = new Google(@)
+    coordinatesFromKml : ()=>
+        q = q.defer();
+        fs.readFile "mapindex.geojson", 'utf-8', (err,data)=>
+            if err
+                console.log err
+            geojson = JSON.parse data
+            allCoordinates = []
+            for feature in geojson["features"]
+                coordinates =  feature["geometry"]["coordinates"]
 
+                polygonCoordinates = []
+                for coordinate in coordinates[0]
+                    coordinate.splice 2, 1
+                    polygonCoordinates.push {longitude : coordinate[0], latitude : coordinate[1]}
+                center = geolib.getCenter polygonCoordinates
+                allCoordinates.push center
+            q.resolve allCoordinates
+        return q.promise
     generateCoordinates : (distance)=>
         bottomleft = [1.149, 103.583]
         topright = [1.490, 104.149]
@@ -62,7 +87,7 @@ class App
             while(currentLng < topright[1])
                 newPointsRow = @distanceFrom currentLat, currentLng, 0, distance
                 
-                console.log "["+newPoints[0]+","+newPointsRow[1]+"]"
+                #console.log "["+newPoints[0]+","+newPointsRow[1]+"]"
                 coordinates.push [newPoints[0], newPointsRow[1]]
                 if currentLng < topright[1]
                     currentLng = newPointsRow[1]
