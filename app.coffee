@@ -10,18 +10,23 @@ request = require("request")
 express = require("express")
 mongodb = require("mongodb")
 Google = require("./src/google-crawler")
+GoogleScheduler = require("./src/google-scheduler")
 geolib = require("geolib")
 
 fs = require("fs")
 q = require("q")
+
+client = require('beanstalk_client').Client
 class App
+    Models : {}
     constructor : ()->
         @config = config
         @request = request
+        @client = client
+
         #@coordinates = @generateCoordinates(config['google']['distance'])
         @coordinatesFromKml().then (result)=>
             @coordinates = result
-            console.log result
         @router = new express()
         @router.use express.json()
         @router.use express.urlencoded()
@@ -36,7 +41,6 @@ class App
             if regex.test req['originalUrl']
                 return next()
             else    
-                console.log "index"
                 res.sendfile "index.html" , {root : __dirname+"/www"}
         #Cross origin fix
         @router.use (req, res, next)=>
@@ -49,7 +53,12 @@ class App
             console.log "Server starting at #{config.port}"
         mongodb.connect config.mongodb , (err,db)=>
             if !err
+
+                @Models.GoogleDB = db.collection "google"
+
                 google = new Google(@)
+                googlesch = new GoogleScheduler(@)
+
     coordinatesFromKml : ()=>
         q = q.defer();
         fs.readFile "mapindex.geojson", 'utf-8', (err,data)=>
@@ -87,7 +96,6 @@ class App
             while(currentLng < topright[1])
                 newPointsRow = @distanceFrom currentLat, currentLng, 0, distance
                 
-                #console.log "["+newPoints[0]+","+newPointsRow[1]+"]"
                 coordinates.push [newPoints[0], newPointsRow[1]]
                 if currentLng < topright[1]
                     currentLng = newPointsRow[1]

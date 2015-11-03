@@ -1,6 +1,6 @@
 var app = angular.module("trend");
 app.constant("API_ENDPOINT", "http://localhost:3000/api");
-app.factory("MainService", ["$resource", "API_ENDPOINT", "$http","$q",function($resource,API_ENDPOINT,$http,$q){
+app.factory("CoordinatesService", ["$resource", "API_ENDPOINT", "$http","$q",function($resource,API_ENDPOINT,$http,$q){
 	 return {
 	 	getCoordinates : function(){
 	 		var defer = $q.defer();
@@ -12,4 +12,9 @@ app.factory("MainService", ["$resource", "API_ENDPOINT", "$http","$q",function($
             return defer.promise;
 	 	}
 	 };
-}]);
+}])
+.factory("GoogleService", ["$resource", "API_ENDPOINT"], function($resource, API_ENDPOINT){
+	return $resource(API_ENDPOINT+"/search?", {
+		
+	});
+});

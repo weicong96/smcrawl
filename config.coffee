@@ -1,8 +1,9 @@
 module.exports = {
     port : 3000
-    mongodb : "mongodb://weicong:weicong96@ds039684.mongolab.com:39684/IbmCloud_14qj6ifb_2c563dlv"
+    mongodb : "mongodb://128.199.100.77:27017/crawl"
     google:
-        api_key : "AIzaSyDC3_nggRbuvTB6vxYvkS-jKp9MoHZwUT8"
+        api_key2 : "AIzaSyDC3_nggRbuvTB6vxYvkS-jKp9MoHZwUT8"
+        api_key : "AIzaSyC3WqpktiXkPHRcTgWTL0TvEKdOZgqE8HU"
         distance : 5000
 
 }
