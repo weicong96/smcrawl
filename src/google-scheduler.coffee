@@ -62,7 +62,7 @@ class GoogleScheduler
                     setTimeout ()=>
                         @getPlaces(coordinates, body["results"], body["next_page_token"]).then (responses)=>
                             Array.prototype.push.apply(responses, body["results"])
-
+                            console.log responses
                             q.resolve(responses)
                     , 2000
                 else
