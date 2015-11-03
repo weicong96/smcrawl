@@ -53,7 +53,7 @@ class App
             console.log "Server starting at #{config.port}"
         mongodb.connect config.mongodb , (err,db)=>
             if !err
-
+                
                 @Models.GoogleDB = db.collection "google"
 
                 google = new Google(@)
