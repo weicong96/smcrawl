@@ -1,5 +1,5 @@
 var app = angular.module("trend");
-app.constant("API_ENDPOINT", "http://localhost:3000/api");
+app.constant("API_ENDPOINT", "http://128.199.100.77:3000/api");
 app.factory("CoordinatesService", ["$resource", "API_ENDPOINT", "$http","$q",function($resource,API_ENDPOINT,$http,$q){
 	 return {
 	 	getCoordinates : function(){
@@ -13,8 +13,14 @@ app.factory("CoordinatesService", ["$resource", "API_ENDPOINT", "$http","$q",fun
 	 	}
 	 };
 }])
-.factory("GoogleService", ["$resource", "API_ENDPOINT"], function($resource, API_ENDPOINT){
-	return $resource(API_ENDPOINT+"/search?", {
-		
+.factory("GoogleService", ["$resource", "API_ENDPOINT", function($resource, API_ENDPOINT){
+	return $resource(API_ENDPOINT+"/places", {
+
+	},{
+		getPlaces : {
+			method : "GET",
+			url : API_ENDPOINT+"/places",
+			isArray : true
+		}
 	});
-});
+}]);
