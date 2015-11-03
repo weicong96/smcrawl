@@ -30,9 +30,14 @@ class GoogleScheduler
                         location : _place["geometry"]["location"]
                         types : _place["types"]
                         reference : _place["reference"]
-                    @App.Models.GoogleDB.insert place, (err,doc)=>
+                    @App.Models.GoogleDB.find {place_id : place["place_id"]}, (err,doc)=>
                         if !err and doc
-                            console.log place["place_id"]
+                            if !doc #If found this place, don't insert. 
+                                @App.Models.GoogleDB.insert place, (err,doc)=>
+                                    if !err and doc
+                                        console.log place["place_id"]
+
+
         console.log "Completed fetch of all coordinates #{@coordinates.length}"
     getPlaces : (coordinates, entries, pagetoken)=>
         if !entries 
