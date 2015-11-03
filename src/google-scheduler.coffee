@@ -16,33 +16,35 @@ class GoogleScheduler
     fetchFromGoogle : ()=>
         promises  = []
         count = 0
-        #@coordinates = @coordinates[0..0]
+        @coordinates = @coordinates[0..0]
         for coordinate in @coordinates
             coordinateArray = [coordinate["latitude"], coordinate["longitude"]]
             promises.push @getPlaces(coordinateArray)
         Q.allSettled(promises).then (results)=>
             for result in results
                 for _place in result["value"]
-                    console.log _place["name"]
-                    place = 
-                        place_id : _place["place_id"]
-                        name : _place["name"]
-                        location : _place["geometry"]["location"]
-                        types : _place["types"]
-                        reference : _place["reference"]
-                    @App.Models.GoogleDB.find {place_id : place["place_id"]}, (err,doc)=>
-                        if !err
-                            if !doc #If found this place, don't insert. 
-                                @App.Models.GoogleDB.insert place, (err,doc)=>
-                                    if !err and doc
-                                        console.log place["place_id"]
-                                    else
-                                        console.log "Blank"
+                    findIfNeeded = (_place)=>
+                        @App.Models.GoogleDB.findOne {place_id : _place["place_id"]}, (err,doc)=>
+                            place = 
+                                place_id : _place["place_id"]
+                                name : _place["name"]
+                                location : _place["geometry"]["location"]
+                                types : _place["types"]
+                                reference : _place["reference"]
+                            if !err
+                                console.log doc
+                                if !doc or doc.length is 0 #If found this place, don't insert. 
+                                    @App.Models.GoogleDB.insert place, (err,doc)=>
+                                        if !err and doc
+                                            console.log place["place_id"]
+                                        else
+                                            console.log err
+                                else
+                                    console.log "already exists"
                             else
-                                console.log "already exists"
-                        else
-                            console.log "error!"
+                                console.log "error!"
 
+                    findIfNeeded _place
 
         console.log "Completed fetch of all coordinates #{@coordinates.length}"
     getPlaces : (coordinates, entries, pagetoken)=>
