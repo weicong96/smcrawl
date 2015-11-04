@@ -24,7 +24,6 @@ class App
         @request = request
         @client = client
 
-        #@coordinates = @generateCoordinates(config['google']['distance'])
         @coordinatesFromKml().then (result)=>
             @coordinates = result
         @router = new express()
