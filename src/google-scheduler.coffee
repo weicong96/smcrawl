@@ -16,7 +16,7 @@ class GoogleScheduler
     fetchFromGoogle : ()=>
         promises  = []
         count = 0
-        @coordinates = @coordinates[0..0]
+        #@coordinates = @coordinates[0..10]
         for coordinate in @coordinates
             coordinateArray = [coordinate["latitude"], coordinate["longitude"]]
             promises.push @getPlaces(coordinateArray)
@@ -32,11 +32,10 @@ class GoogleScheduler
                                 types : _place["types"]
                                 reference : _place["reference"]
                             if !err
-                                console.log doc
                                 if !doc or doc.length is 0 #If found this place, don't insert. 
                                     @App.Models.GoogleDB.insert place, (err,doc)=>
                                         if !err and doc
-                                            console.log place["place_id"]
+                                            console.log "Insert"
                                         else
                                             console.log err
                                 else
