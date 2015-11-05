@@ -12,7 +12,7 @@ class Google
             page = 0
         else
             page = req.query.page
-        pageSize = 100 
+        pageSize = 1000 
 
         @App.Models.GoogleDB.find({}).skip(page * pageSize).limit(pageSize).toArray (err,doc)=>
             if !err and doc

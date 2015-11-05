@@ -9,7 +9,7 @@ config = require("./config")
 request = require("request")
 express = require("express")
 mongodb = require("mongodb")
-Google = require("./src/google-crawler")
+Google = require("./src/google-api")
 GoogleScheduler = require("./src/google-scheduler")
 geolib = require("geolib")
 
@@ -34,13 +34,6 @@ class App
         @router.use "/css", express.static "#{__dirname}/www/css"
         @router.use "/templates", express.static "#{__dirname}/www/templates"
         @router.use "/bower_components" , express.static "#{__dirname}/www/bower_components"
-
-        @router.all "/*", (req, res, next)=>
-            regex = new RegExp('^/api')
-            if regex.test req['originalUrl']
-                return next()
-            else    
-                res.sendfile "index.html" , {root : __dirname+"/www"}
         #Cross origin fix
         @router.use (req, res, next)=>
             res.setHeader "Access-Control-Allow-Origin", "*"
@@ -48,6 +41,13 @@ class App
             res.setHeader "Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept"
             res.setHeader "Access-Control-Allow-Credentials", true
             next()
+        @router.all "/*", (req, res, next)=>
+            regex = new RegExp('^/api')
+            if regex.test req['originalUrl']
+                return next()
+            else    
+                res.sendfile "index.html" , {root : __dirname+"/www"}
+        
         @router.listen config.port, ()=>
             console.log "Server starting at #{config.port}"
         mongodb.connect config.mongodb , (err,db)=>
@@ -56,8 +56,7 @@ class App
                 @Models.GoogleDB = db.collection "google"
 
                 google = new Google(@)
-                googlesch = new GoogleScheduler(@)
-
+    
     coordinatesFromKml : ()=>
         q = q.defer();
         fs.readFile "mapindex.geojson", 'utf-8', (err,data)=>
