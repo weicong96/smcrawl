@@ -25,4 +25,15 @@ app.factory("CoordinatesService", ["$resource", "API_ENDPOINT", "$http","$q",fun
 			isArray : true
 		}
 	});
+}])
+.factory("InstagramService", ["$resource", "API_ENDPOINT", function($resource, API_ENDPOINT){
+	return $resource(API_ENDPOINT+"/media", {
+
+	}, {
+		getMedia: {
+			method :"GET",
+			url : API_ENDPOINT+"/media",
+			isArray : true
+		}
+	});
 }]);

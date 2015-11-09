@@ -16,7 +16,7 @@ class GoogleScheduler
     fetchFromGoogle : ()=>
         promises  = []
         count = 0
-        @coordinates = @coordinates[0..1]
+        #@coordinates = @coordinates[0..1]
         for coordinate in @coordinates
             coordinateArray = [coordinate["latitude"], coordinate["longitude"]]
             url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=#{@App.config['google']['api_key']}&location=#{coordinateArray[0]},#{coordinateArray[1]}&radius=#{@App.config['google']['distance']}"

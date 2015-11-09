@@ -10,19 +10,20 @@ request = require("request")
 express = require("express")
 mongodb = require("mongodb")
 Google = require("./src/google-api")
+Instagram = require("./src/instagram-api")
 GoogleScheduler = require("./src/google-scheduler")
 geolib = require("geolib")
 
 fs = require("fs")
 q = require("q")
 
-client = require('beanstalk_client').Client
+#client = require('beanstalk_client').Client
 class App
     Models : {}
     constructor : ()->
         @config = config
         @request = request
-        @client = client
+        #@client = client
 
         @coordinatesFromKml().then (result)=>
             @coordinates = result
@@ -54,8 +55,10 @@ class App
             if !err
                 
                 @Models.GoogleDB = db.collection "google"
+                @Models.InstagramDB = db.collection "instagram"
 
                 google = new Google(@)
+                insta = new Instagram(@)
     
     coordinatesFromKml : ()=>
         q = q.defer();
