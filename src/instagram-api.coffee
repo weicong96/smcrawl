@@ -6,9 +6,9 @@ class Instagram
             page = 0
         else
             page = req.query.page
-        pageSize = 100 
+        #pageSize = 100 
 
-        @App.Models.InstagramDB.find({}).skip(page * pageSize).limit(pageSize).toArray (err,doc)=>
+        @App.Models.InstagramDB.find({}).toArray (err,doc)=> #.skip(page * pageSize).limit(pageSize)
             if !err and doc
                 return @App.sendContent req, res, doc
             else

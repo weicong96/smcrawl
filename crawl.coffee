@@ -32,7 +32,7 @@ class App
         @q = q
         @coordinatesFromKml().then (result)=>
             @coordinates = result
-
+            console.log @coordinates.length
             client.use("jobs").onSuccess (data)=>
                 @con = client
                 mongodb.connect config.mongodb , (err,db)=>
@@ -89,7 +89,6 @@ class App
         return defer.promise
     makeRecursiveCall : ()=>
         @con.put(JSON.stringify(arguments)).onSuccess (data)=>
-            console.log "data"
     listenToTube : ()=>
         @con.watch('jobs').onSuccess (data)=>
             @con.reserve().onSuccess (job)=>

@@ -30,9 +30,9 @@ app.controller("MainController" , ["$scope" ,"CoordinatesService","GoogleService
       noWrap          : true,
       reuseTiles      : false
     }).addTo(map);
-    
+    /*
     GoogleService.getPlaces({},function(locations){
-        /*console.log(locations.length);
+        console.log(locations.length);
         var markers = new L.MarkerClusterGroup({maxClusterRadius : 200});
         locations.forEach(function(location){
             var latLng = new L.LatLng(location["location"]["lat"], location["location"]["lng"]);
@@ -45,8 +45,8 @@ app.controller("MainController" , ["$scope" ,"CoordinatesService","GoogleService
             marker.bindPopup(div);
             markers.addLayer(marker);
         });
-        map.addLayer(markers);*/
-    });
+        map.addLayer(markers);
+    });*/
     InstagramService.getMedia({}, function(medias){
       var markers = new L.MarkerClusterGroup({maxClusterRadius : 200});
         medias.forEach(function(media){
