@@ -13,7 +13,7 @@ Google = require("./src/google-api")
 Instagram = require("./src/instagram-api")
 GoogleScheduler = require("./src/google-scheduler")
 geolib = require("geolib")
-
+moment = require("moment")
 fs = require("fs")
 q = require("q")
 
@@ -23,6 +23,7 @@ class App
     constructor : ()->
         @config = config
         @request = request
+        @moment = moment
         #@client = client
 
         @coordinatesFromKml().then (result)=>
