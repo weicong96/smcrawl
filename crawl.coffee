@@ -16,6 +16,7 @@ InstagramScheduler = require("./src/instagram-scheduler")
 
 Google = require("./src/class/Google")
 Instagram = require("./src/class/Instagram")
+GoogleDetails = require "./src/class/GoogleDetails"
 
 geolib = require("geolib")
 fs = require("fs")
@@ -44,8 +45,11 @@ class App
                         @Models.GoogleDB = db.collection "google"
                         @Models.InstagramDB = db.collection "instagram"
 
-                        @Google = new Google(@)
                         @Instagram = new Instagram(@)
+
+
+                        @GoogleDetails = new GoogleDetails(@)
+                        @Google = new Google(@)
 
                         googlesch = new GoogleScheduler(@)
                         #instagramsch = new InstagramScheduler(@)
@@ -57,21 +61,22 @@ class App
             defer.resolve value
         return defer.promise;
     findIfNeeded : (entity, model)=>
-        #entity is abstract entity concept
-        #model is db collection
+        #Find using primary key
         query = {}
         query[entity.primaryKey] = model[entity.primaryKey]
-        entity.db.findOne query, (err,doc)=>
-            parsedEntity = entity.getEntity(model)
 
+        entity.db.findOne query, (err,doc)=>
+            parsedEntity = entity.getEntity(model)#If entity is equal, then no need carry on with new code, can be useful for updating?
+            
             if !err
                 if !doc or doc.length is 0 #If found this place, don't insert. 
                     entity.db.insert parsedEntity, (err,doc)=>
-                        if !err and doc
-                            if doc["ops"][0]["caption"]
-                                console.log doc["ops"][0]["caption"]["text"]
-                        else
+                        if err
                             console.log err
+                else
+                    entity.db.update query, {$set : parsedEntity} , (err,doc)=>
+                        if !err and doc
+                            console.log query
             else
                 console.log "error!"
     coordinatesFromKml : ()=>
@@ -95,19 +100,25 @@ class App
     makeRecursiveCall : ()=>
         url = arguments[0]
         _type = ""
+        subtype = ""
         if url.indexOf("instagram") > -1 
             _type = "instagram"
         else if url.indexOf("google") > -1
             _type = "google"
+            if url.indexOf("details") > -1
+                subtype = "details"
+            else
+                subtype = "search"
+
         jobPayload = 
             data : arguments
             type : _type
+            section : subtype
 
         @con.put(JSON.stringify(jobPayload)).onSuccess (data)=>
     clearJobs : ()=>
         @con.watch('jobs').onSuccess (data)=>
             @con.reserve().onSuccess (job)=>
-                console.log job
                 console.log "clear job #{job.id}"
                 @con.deleteJob(job.id).onSuccess ()=>
                     @clearJobs()
@@ -117,7 +128,6 @@ class App
             @con.reserve().onSuccess (job)=>
                 json_string = job.data
                 job_id = job.id
-                console.log job_id
                 if json_string 
                     json_data = JSON.parse(json_string).data
                     if json_data
@@ -126,11 +136,13 @@ class App
                         unixts = new @moment().startOf('hour').unix()
                         
                         model = null
-                        type = JSON.parse(json_string).type
+                        parsedPayload = JSON.parse(json_string)
+                        type = parsedPayload.type
                         if type is "instagram"
                             model = @Instagram
                         if type is "google"
                             model = @Google
+
                         @getRedisKey(type+"_"+unixts).then (value)=>
                             if value <= (@config[type]['query_limit']-1)
                                 @makeRequest.apply(null, arr).then (res)=>
@@ -138,13 +150,15 @@ class App
                                         value = parseInt value
                                         if !value
                                             value = 0 
-                                        value = value + 1
-                                        console.log "#{type}_#{unixts} : #{value}"
+                                        value = value + res['pages']
                                         @setRedisValue type+"_"+unixts, value
-                                    console.log res['pages']+" pages "
-                                    for media in res['data']
-                                        @findIfNeeded model , media
-
+                                    console.log "#{type}_#{unixts} : #{value}"
+                                    console.log res['data']
+                                    if !Array.isArray res['data']
+                                        @findIfNeeded model , res['data']
+                                    else
+                                        for media in res['data']
+                                            @findIfNeeded model, media
                                     @con.deleteJob(job_id).onSuccess ()=>
                                         console.log "destry job #{job_id}"
                                         @listenToTube() #tube doesn't listen constantly? kind of a recursive call

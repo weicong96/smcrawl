@@ -16,16 +16,12 @@ class GoogleScheduler
     fetchFromGoogle : ()=>
         promises  = []
         count = 0
-        #@coordinates = @coordinates[0..1]
+        #@coordinates = @coordinates[0..0]
         for coordinate in @coordinates
             coordinateArray = [coordinate["latitude"], coordinate["longitude"]]
             url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=#{@App.config['google']['api_key']}&location=#{coordinateArray[0]},#{coordinateArray[1]}&radius=#{@App.config['google']['distance']}"
 
-            promises.push @App.makeRecursiveCall(url, "next_page_token", "pagetoken","results")
-        Q.allSettled(promises).then (results)=>
-            for result in results
-                for _place in result["value"]
-                    @App.findIfNeeded @App.Google, _place
+            @App.makeRecursiveCall(url, "next_page_token", "pagetoken","results")
 
         console.log "Completed fetch of all coordinates #{@coordinates.length}"
     
