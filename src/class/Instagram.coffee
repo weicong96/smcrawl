@@ -10,5 +10,5 @@ class Instagram
         media = jsonFromRequest
         return media
     getNestedEntitiesJobs : ()=>
-        console.log "Get nested!"
+        console.log "get nested"
 module.exports = Instagram

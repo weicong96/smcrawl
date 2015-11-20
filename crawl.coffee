@@ -51,8 +51,8 @@ class App
                         @GoogleDetails = new GoogleDetails(@)
                         @Google = new Google(@)
 
-                        googlesch = new GoogleScheduler(@)
-                        #instagramsch = new InstagramScheduler(@)
+                        #googlesch = new GoogleScheduler(@)
+                        instagramsch = new InstagramScheduler(@)
     setRedisValue : (key , value)=>
         redis.set key, value
     getRedisKey : (key)=>
