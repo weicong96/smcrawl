@@ -34,7 +34,6 @@ class App
         @q = q
         @moment = moment
 
-        consoel.log "hello"
         @coordinatesFromKml().then (result)=>
             @coordinates = result
             client.use("jobs").onSuccess (data)=>
@@ -47,7 +46,6 @@ class App
                         @Models.InstagramDB = db.collection "instagram"
 
                         @Instagram = new Instagram(@)
-
 
                         @GoogleDetails = new GoogleDetails(@)
                         @Google = new Google(@)
