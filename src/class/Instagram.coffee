@@ -8,7 +8,16 @@ class Instagram
 
     getEntity : (jsonFromRequest)=>
         media = jsonFromRequest
+        
         return media
     getNestedEntitiesJobs : ()=>
         console.log "get nested"
+    getWords : (entity)=>
+        words = []
+        if entity['caption']
+            words = entity['caption']['text'].split(" ")
+        
+        for tag in entity['tags']
+            words.push tag
+        return words
 module.exports = Instagram

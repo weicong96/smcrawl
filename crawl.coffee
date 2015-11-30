@@ -10,6 +10,7 @@ request = require("request")
 express = require("express")
 mongodb = require("mongodb")
 moment = require "moment"
+permutation = require "./permutation"
 
 GoogleScheduler = require("./src/google-scheduler")
 InstagramScheduler = require("./src/instagram-scheduler")
@@ -25,10 +26,15 @@ redis = require("redis").createClient();
 
 nodestalker = require('nodestalker')
 client = nodestalker.Client "127.0.0.1:11300"
+#db = new neo4j "http://neo4j:98941998@128.199.100.77:7474"
+
+neo4j = require "./neo4j"
 
 class App
     Models : {}
     constructor : ()->
+        neo4j = new neo4j("neo4j", "98941998", "128.199.100.77:7474")
+        
         @config = config
         @request = request
         @q = q
@@ -66,7 +72,8 @@ class App
 
         entity.db.findOne query, (err,doc)=>
             parsedEntity = entity.getEntity(model)#If entity is equal, then no need carry on with new code, can be useful for updating?
-            
+            words = entity.getWords parsedEntity, entity
+            @putWords words, entity, parsedEntity
             if !err
                 if !doc or doc.length is 0 #If found this place, don't insert. 
                     entity.db.insert parsedEntity, (err,doc)=>
@@ -115,6 +122,32 @@ class App
             section : subtype
 
         @con.put(JSON.stringify(jobPayload)).onSuccess (data)=>
+    putWords : (words, entity, parsedEntity)=>
+        words = entity.getWords(parsedEntity)
+        words = permutation(words, 2)
+        for word in words
+            neo4j.createNode {word : word[0]}, (err,node)=>
+                if err
+                    throw err
+                console.log node.body['metadata']['id']
+                neo4j.createNode {word : word[1]}, (err,node2)=>
+                    if err
+                        throw err      
+                    console.log node2.body['metadata']['id']
+                    neo4j.createRelationship node1.body['metadata']['id'] , node2.body['metadata']['id'], "USED_WITH", {}, (err, res)=>
+                        if err
+                            throw err
+                        console.log res
+        #for _word in words
+            #db.insertNode {word : _word[0]}, (err, node)=>
+            #if err
+            #    throw err
+            #console.log node
+            #if err
+            #console.log err
+            #node.createRelationshipTo node2, "USED_WITH", (err,data)=>
+            #console.log err 
+            #console.log data
     clearJobs : ()=>
         @con.watch('jobs').onSuccess (data)=>
             @con.reserve().onSuccess (job)=>
@@ -152,7 +185,6 @@ class App
                                         value = value + res['pages']
                                         @setRedisValue type+"_"+unixts, value
                                     console.log "#{type}_#{unixts} : #{value}"
-                                    console.log res['data']
                                     if !Array.isArray res['data']
                                         @findIfNeeded model , res['data']
                                     else
@@ -170,6 +202,7 @@ class App
                         @listenToTube()
                 else
                     @listenToTube()
+
     #Read from beanstalkd tube
     #Then make request after that
     makeRequest : (_url, token, urlTokenKey, entriesKey, entries, previousResponse, pages)=>
@@ -198,7 +231,6 @@ class App
             if pages is NaN or pages is undefined 
                 pages = 1
             @request url, (error, response, body)=>
-                console.log url
                 if body
                     body = JSON.parse body
                      

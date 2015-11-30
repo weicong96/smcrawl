@@ -16,4 +16,7 @@ class Google
         url = "https://maps.googleapis.com/maps/api/place/details/json?key=#{@App.config['google']['api_key']}&placeid=#{jsonFromRequest[@primaryKey]}" 
         
         @App.makeRecursiveCall(url, "", "","result")
+
+    getWords : (entity)=>
+        return ""
 module.exports = Google
