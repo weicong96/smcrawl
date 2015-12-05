@@ -1,0 +1,42 @@
+{
+  "name": "onemap-crawl",
+  "version": "0.0.0",
+  "main": "lib/onemap-crawl.js",
+  "description": "The best module ever.",
+  "homepage": "https://github.com//onemap-crawl",
+  "bugs": "https://github.com//onemap-crawl/issues",
+  "author": {
+    "name": "",
+    "email": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com//onemap-crawl"
+  },
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "devDependencies": {
+    "chai": "~1.7.2",
+    "coffee-script": "^1.10.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-watch": "~0.5.0",
+    "grunt-simple-mocha": "~0.4.0",
+    "matchdep": "~0.1.1",
+    "mocha": "~1.12.1",
+    "nodemon": "^1.8.0",
+    "sinon": "~1.7.3",
+    "sinon-chai": "~2.4.0"
+  },
+  "dependencies": {
+    "configstore": "^1.3.0",
+    "express": "^3.4.8",
+    "mongodb": "^2.0.47",
+    "q": "^1.4.1",
+    "request": "^2.65.0"
+  }
+}
